@@ -1,47 +1,52 @@
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
-import { parseEther } from 'viem';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
 import { motion, AnimatePresence } from 'motion/react';
-import { CalendarCheck2, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
+import abi from '../lib/abi.json';
+
+const CONTRACT_ADDRESS = '0xD89c8D0CD1871262D821BDbc1bB1B18181818181'; // Placeholder address
 
 export function CheckIn() {
   const { isConnected, address } = useAccount();
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
-  const { sendTransaction, data: hash, isPending, error } = useSendTransaction();
+  
+  const { data: canCheckInNow } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi,
+    functionName: 'canCheckIn',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    }
+  });
+
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
-    // Basic local state for demo purposes, in production this would come from a contract or server
-    const lastCheckIn = localStorage.getItem(`lastCheckIn_${address}`);
-    if (lastCheckIn) {
-      const lastDate = new Date(lastCheckIn).toDateString();
-      const today = new Date().toDateString();
-      if (lastDate === today) {
-        setHasCheckedIn(true);
-      }
+    if (canCheckInNow === false) {
+      setHasCheckedIn(true);
+    } else {
+      setHasCheckedIn(false);
     }
-  }, [address, isConfirmed]);
+  }, [canCheckInNow]);
 
   const handleCheckIn = () => {
     if (!address) return;
 
-    // Sending a 0 ETH transaction to self with empty data is a simple "Check-in"
-    // that only costs gas. On Base, this is very cheap.
-    sendTransaction({
-      to: address,
-      value: parseEther('0'),
-      // In a real scenario, we might call a contract function
-      // data: '0xabc123...', 
+    (writeContract as any)({
+      address: CONTRACT_ADDRESS as `0x${string}`,
+      abi: abi as any,
+      functionName: 'checkIn',
     });
   };
 
   useEffect(() => {
     if (isConfirmed) {
-      localStorage.setItem(`lastCheckIn_${address}`, new Date().toISOString());
       setHasCheckedIn(true);
     }
-  }, [isConfirmed, address]);
+  }, [isConfirmed]);
 
   if (!isConnected) return null;
 
@@ -68,10 +73,10 @@ export function CheckIn() {
           onClick={handleCheckIn}
           disabled={hasCheckedIn || isPending || isConfirming}
           className={cn(
-            "relative w-full py-5 px-6 rounded-2xl font-black text-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 overflow-hidden shadow-inner",
+            "relative w-full py-5 px-6 rounded-2xl font-black text-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 overflow-hidden shadow-2xl",
             hasCheckedIn 
-              ? "bg-white/20 text-white cursor-default"
-              : "bg-white text-pink-600 hover:bg-pink-50"
+              ? "bg-[#4A0E2E]/20 text-white border border-white/20 cursor-default opacity-80"
+              : "bg-white text-[#4A0E2E] hover:bg-pink-50 hover:-translate-y-1 shadow-pink-900/20"
           )}
         >
           <AnimatePresence mode="wait">
