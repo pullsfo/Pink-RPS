@@ -87,21 +87,6 @@ function MainApp() {
           ) : (
             <Game />
           )}
-
-          {/* Feature Grid */}
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-              { icon: Zap, label: "Instant Speed", desc: "Powered by Base L2 for near-zero latency moves." },
-              { icon: ShieldCheck, label: "On-chain Trust", desc: "Secure daily check-ins with verifiable proof." },
-              { icon: Sparkles, label: "Pink Aesthetics", desc: "Crafted with 2026 design standards for pro gamers." }
-            ].map((feature, i) => (
-              <div key={i} className="p-8 rounded-[32px] bg-white shadow-xl shadow-pink-100 border border-white hover:-translate-y-1 transition-transform">
-                <feature.icon className="w-8 h-8 text-pink-500 mb-4" />
-                <h4 className="font-black text-pink-900 text-lg mb-2 uppercase tracking-tight">{feature.label}</h4>
-                <p className="text-sm text-pink-900/40 leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
         </section>
 
         {/* Sidebar / Check-in */}
