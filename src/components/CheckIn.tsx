@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
-import abi from '../lib/abi.json';
+import { abi } from '../lib/abi';
 
 const CONTRACT_ADDRESS = '0xD89c8D0CD1871262D821BDbc1bB1B18181818181'; // Placeholder address
 
@@ -37,7 +37,7 @@ export function CheckIn() {
 
     (writeContract as any)({
       address: CONTRACT_ADDRESS as `0x${string}`,
-      abi: abi as any,
+      abi,
       functionName: 'checkIn',
     });
   };
